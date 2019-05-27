@@ -99,6 +99,7 @@ class UI {
         // Display cart item
         this.addCartItem(cartItem);
         // Show the cart
+        this.showCart();
       });
     });
   }
@@ -118,7 +119,7 @@ class UI {
     div.classList.add('cart-item');
     div.innerHTML = `<img src=${item.image} alt="product" />
     <div>
-      <h4>q${item.title}</h4>
+      <h4>${item.title}</h4>
       <h5>$${item.price}</h5>
       <span class="remove-item" data-id=${item.id}>remove</span>
     </div>
@@ -127,6 +128,30 @@ class UI {
       <p class="item-amount">${item.amount}</p>
       <i class="fas fa-chevron-down" data-id=${item.id}></i>
     </div>`;
+    cartContent.appendChild(div);
+  }
+
+  showCart() {
+    cartOverlay.classList.add('transparentBcg');
+    cartDOM.classList.add('showCart');
+  }
+
+  setupAPP() {
+    // Assign values from local storage to the cart array
+    cart = Storage.getCart();
+    this.setCartValues(cart);
+    this.populateCart(cart);
+    cartButton.addEventListener('click', this.showCart);
+    closeCartButton.addEventListener('click', this.hideCart);
+  }
+
+  populateCart(cart) {
+    cart.forEach(item => this.addCartItem(item));
+  }
+
+  hideCart() {
+    cartOverlay.classList.remove('transparentBcg');
+    cartDOM.classList.remove('showCart');
   }
 }
 
@@ -143,9 +168,16 @@ class Storage {
     return products.find(product => product.id === id);
   }
 
-  //   Save cart items to local storage
+  // Save cart items to local storage
   static saveCart(cart) {
     localStorage.setItem('cart', JSON.stringify(cart));
+  }
+
+  // Assign local storage items to the 'cart' array
+  static getCart() {
+    return localStorage.getItem('cart')
+      ? JSON.parse(localStorage.getItem('cart'))
+      : [];
   }
 }
 
@@ -153,6 +185,9 @@ class Storage {
 document.addEventListener('DOMContentLoaded', () => {
   const ui = new UI();
   const products = new Products();
+
+  // Set up Application
+  ui.setupAPP();
 
   // Get all products
   products
